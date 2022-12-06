@@ -2,6 +2,7 @@ const authModel = require('../models/authmodel');
 const bcrypt = require('bcrypt');
 const saltRounds = 10;
 
+//for signup
 exports.signup = async(req,res) => {
     const user = req.body;
     const password = await bcrypt.hash(req.body.password,saltRounds);
@@ -21,6 +22,7 @@ exports.signup = async(req,res) => {
     }
 }
 
+//for login
 exports.login = async(req,res) => {
     const user = await authModel.findOne({email:req.body.email});
     if(!user){
@@ -34,6 +36,7 @@ exports.login = async(req,res) => {
     res.status(200).send(user);
 }
 
+//gives all the login users list
 exports.authData = async(req,res) => {
     try{
         const authData = await authModel.find({});
