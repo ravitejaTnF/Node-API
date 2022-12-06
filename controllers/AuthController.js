@@ -7,22 +7,28 @@ exports.signup = async(req,res) => {
     const password = await bcrypt.hash(req.body.password,saltRounds);
     const data = {...req.body,password:password};
     const userdata = new authModel(data);
-    try{
-        await authModel.create(userdata);
-        res.status(200).json(userdata);
-    }catch(err){
-        res.status(400).send(err);
+    const isUser = await authModel.find({email:req.body.email});
+    if(isUser.length > 0){
+        res.json({result:'Email already registred,try new email..!',status:false});
+        return;
+    }else{
+        try{
+            await authModel.create(userdata);
+            res.status(200).json(userdata);
+        }catch(err){
+            res.status(400).send(err);
+        }
     }
 }
 
 exports.login = async(req,res) => {
     const user = await authModel.findOne({email:req.body.email});
     if(!user){
-        res.status(404).json({error:'User not found!'});
+        res.status(404).json({error:'User not found!',status:false});
         return;
     }
     if(!(await bcrypt.compare(req.body.password,user.password))){
-        res.status(401).json({error:'Wrong password!'});
+        res.status(401).json({error:'Wrong password!',status:false});
         return;
     }
     res.status(200).send(user);
@@ -33,6 +39,6 @@ exports.authData = async(req,res) => {
         const authData = await authModel.find({});
         res.status(200).send(authData);
     }catch(err){
-        res.status(400).json(err);
+        res.status(400).json({error:err,status:false});
     }
 }
